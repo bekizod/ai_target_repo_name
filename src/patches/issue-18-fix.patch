@@ -1,0 +1,13 @@
+diff --git a/src/service/handler.ts b/src/service/handler.ts
+index 8a3f912..4c8e701 100644
+--- a/src/service/handler.ts
++++ b/src/service/handler.ts
+@@ -28,7 +28,12 @@ export async function processIncomingPayload(payload: RequestPayload) {
+-  return await remoteProvider.dispatch(payload);
++  return await circuitBreaker.execute(async () => {
++    return await retryWithBackoff(() => remoteProvider.dispatch(payload), {
++      maxRetries: 3,
++      baseDelayMs: 250,
++    });
++  });
+ }
